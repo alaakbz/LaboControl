@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microbiologie — PRODERMA LabControl</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand-950:#0f1f38;--brand-900:#142848;--brand-500:#427edb;--brand-100:#e7effa;--brand-50:#f2f7fd;
+  --sidebar-w:260px;--sidebar-bg:#182b45;--sidebar-border:rgba(255,255,255,0.1);
+  --sidebar-text:#d8e4f2;--sidebar-text-muted:#8ba2c2;--sidebar-item-active:#25406b;--sidebar-item-hover:rgba(255,255,255,0.08);
+  --bg-app:#f6f8fb;--bg-surface:#ffffff;--bg-subtle:#f1f4f9;
+  --border-light:#e5ebf3;--border-subtle:#d8e2ee;--border-medium:#b9c9dc;--border-focus:#3b74c4;
+  --text-main:#131b26;--text-secondary:#4a5b73;--text-muted:#74859d;
+  --ok-fg:#0d6842;--ok-bg:#ebf7f1;--ok-border:#a4ddc4;--ko-fg:#ad1818;--ko-bg:#fdf2f2;--ko-border:#f8b4b4;
+  --warn-fg:#9a5b00;--warn-bg:#fff8eb;--warn-border:#fed79e;--info-fg:#1d5290;--info-bg:#eef5fc;--info-border:#b9d7f5;
+  --shadow-sm:0 1px 2px 0 rgba(19,27,38,0.04);--shadow-md:0 4px 6px -1px rgba(19,27,38,0.05);
+  --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--topbar-h:62px;--transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',sans-serif;background:var(--bg-app);color:var(--text-main);line-height:1.45;min-height:100vh;overflow-x:hidden}
+code,.font-mono{font-family:'JetBrains Mono',monospace}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--border-focus);outline-offset:1px}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;z-index:40;border-right:1px solid var(--sidebar-border);user-select:none}
+.sidebar-header{padding:20px 18px 18px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar-brand{display:flex;align-items:center;gap:12px}
+.sidebar-logo-img{width:40px;height:40px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0}
+.sidebar-logo{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:var(--radius-sm);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+.sidebar-title{font-size:15px;font-weight:700;color:#fff}
+.sidebar-sub{font-size:11px;color:var(--sidebar-text-muted);display:block;margin-top:1px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:16px 10px;display:flex;flex-direction:column;gap:16px}
+.nav-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--sidebar-text-muted);padding:0 10px 4px}
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:8.5px 11px;border-radius:var(--radius-sm);color:var(--sidebar-text);font-size:12.5px;font-weight:500;text-align:left;transition:var(--transition);text-decoration:none}
+.nav-item:hover{background:var(--sidebar-item-hover);color:#fff}
+.nav-item.active{background:var(--sidebar-item-active);color:#fff;font-weight:600;border-left:3px solid #3b82f6}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.85}
+.nav-item.active .nav-icon{opacity:1;color:#93c5fd}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700}
+.badge-danger{background:rgba(220,38,38,0.25);color:#fca5a5;border:1px solid rgba(220,38,38,0.35)}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--sidebar-border);display:flex;align-items:center;justify-content:space-between}
+.user-info-box{display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:#2b4875;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.2)}
+.user-name{font-size:12px;font-weight:600;color:#fff}
+.user-role{font-size:10.5px;color:var(--sidebar-text-muted)}
+.main-wrapper{margin-left:var(--sidebar-w);width:calc(100% - var(--sidebar-w));min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar-h);background:var(--bg-surface);border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:30}
+.page-title-group h1{font-size:17px;font-weight:700}
+.page-title-group .breadcrumbs{font-size:11.5px;color:var(--text-muted)}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+.lab-clock{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);padding:5px 10px;border-radius:var(--radius-sm);background:var(--bg-subtle);border:1px solid var(--border-light);display:flex;align-items:center;gap:6px}
+.mode-badge{padding:4px 9px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;background:var(--brand-50);border:1px solid var(--brand-100);color:#1e3a68}
+.content-body{padding:24px 28px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.col-12{grid-column:span 12}
+.lab-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);overflow:hidden}
+.lab-card-header{padding:14px 18px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between}
+.lab-card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.lab-card-body{padding:18px}
+.table-container{width:100%;overflow-x:auto;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-surface)}
+.lab-table{width:100%;border-collapse:collapse;text-align:left;font-size:12.5px}
+.lab-table th{background:var(--bg-subtle);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;padding:10px 14px;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+.lab-table td{padding:10px 14px;border-bottom:1px solid var(--border-light)}
+.lab-table tbody tr:hover{background-color:var(--bg-subtle)}
+.lab-table .empty-cell{text-align:center;padding:32px 16px;color:var(--text-muted)}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+.status-pill::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%}
+.status-pill.ok{background:var(--ok-bg);color:var(--ok-fg);border:1px solid var(--ok-border)}
+.status-pill.ok::before{background:var(--ok-fg)}
+.status-pill.ko{background:var(--ko-bg);color:var(--ko-fg);border:1px solid var(--ko-border)}
+.status-pill.ko::before{background:var(--ko-fg)}
+.status-pill.wait{background:var(--warn-bg);color:var(--warn-fg);border:1px solid var(--warn-border)}
+.status-pill.wait::before{background:var(--warn-fg)}
+.status-pill.info{background:var(--info-bg);color:var(--info-fg);border:1px solid var(--info-border)}
+.status-pill.info::before{background:var(--info-fg)}
+.form-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+.form-input,.form-select{width:100%;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border-medium);border-radius:var(--radius-sm);font-size:12.5px;color:var(--text-main);transition:var(--transition)}
+.form-input:focus,.form-select:focus{border-color:var(--brand-500)}
+.form-input[readonly]{background:var(--bg-subtle);color:var(--text-secondary);border-color:var(--border-subtle)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;transition:var(--transition);cursor:pointer}
+.btn-primary{background:#1e3a68;color:#fff;border:1px solid #152c50}
+.btn-primary:hover{background:#274c87}
+.btn-secondary{background:var(--bg-subtle);color:var(--text-secondary);border:1px solid var(--border-medium)}
+.btn-secondary:hover{background:var(--border-light)}
+.btn-danger{background:#b91c1c;color:#fff;border:1px solid #991b1b}
+.btn-danger:hover{background:#991b1b}
+.btn-sm{padding:4px 8px;font-size:11.5px}
+.btn-icon{padding:6px;border-radius:var(--radius-sm);color:var(--text-secondary)}
+.btn-icon:hover{background:var(--bg-subtle)}
+.norm-guide-box{background:var(--info-bg);border:1px solid var(--info-border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-main);display:flex;gap:10px;align-items:flex-start}
+.norm-guide-box strong{color:var(--info-fg)}
+.alert{padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:8px}
+.alert-success{background:var(--ok-bg);border:1px solid var(--ok-border);color:var(--ok-fg)}
+.alert-error{background:var(--ko-bg);border:1px solid var(--ko-border);color:var(--ko-fg)}
+.alert-warn{background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn-fg)}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.25s ease}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .main-wrapper{margin-left:0!important;width:100%!important}
+  .topbar{padding:0 16px}.content-body{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></symbol>
+  <symbol id="icon-sample" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></symbol>
+  <symbol id="icon-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.36 19.34A2 2 0 0 0 6.1 22h11.8a2 2 0 0 0 1.74-2.66L14 9.31V2"></path><line x1="8" y1="2" x2="16" y2="2"></line><line x1="8" y1="14" x2="16" y2="14"></line></symbol>
+  <symbol id="icon-microbe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"></circle></symbol>
+  <symbol id="icon-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path></symbol>
+  <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></symbol>
+  <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></symbol>
+  <symbol id="icon-audit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></symbol>
+  <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></symbol>
+</svg>
+
+<aside class="sidebar" id="appSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <img src="img/logo.png" alt="PRODERMA" class="sidebar-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="sidebar-logo" style="display:none">P</div>
+      <div><div class="sidebar-title">PRODERMA</div><div class="sidebar-sub">LabControl V1.1</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Opérations Analytiques</div>
+    <div class="nav-group">
+      <a class="nav-item" href="dashboard.html"><svg class="nav-icon"><use href="#icon-dash"></use></svg><span>Tableau de bord</span></a>
+      <a class="nav-item" href="samples.html"><svg class="nav-icon"><use href="#icon-sample"></use></svg><span>Échantillons & QR</span></a>
+      <a class="nav-item" href="physchem.html"><svg class="nav-icon"><use href="#icon-flask"></use></svg><span>Physico-chimie</span></a>
+      <a class="nav-item active" href="micro.html"><svg class="nav-icon"><use href="#icon-microbe"></use></svg><span>Microbiologie</span></a>
+    </div>
+    <div class="nav-section-label">Référentiel & Qualité</div>
+    <div class="nav-group">
+      
+      <a class="nav-item" href="standards.html"><svg class="nav-icon"><use href="#icon-book"></use></svg><span>Bibliothèque IANOR</span></a>
+      <a class="nav-item" href="trends.html"><svg class="nav-icon"><use href="#icon-chart"></use></svg><span>PH des produits</span></a>
+      <a class="nav-item" href="oos.html"><svg class="nav-icon"><use href="#icon-alert"></use></svg><span>Anomalies / OOS</span><span class="nav-badge badge-danger" id="navOosBadge" style="display:none">0</span></a>
+    </div>
+    <div class="nav-section-label">Conformité & Système</div>
+    <div class="nav-group">
+     
+      <a class="nav-item" href="import.html"><svg class="nav-icon"><use href="#icon-upload"></use></svg><span>Importer fichiers</span></a>
+     
+      <a class="nav-item" href="users.html"><svg class="nav-icon"><use href="#icon-users"></use></svg><span>Habilitations & Signatures</span></a>
+      <a class="nav-item" href="settings.html"><svg class="nav-icon"><use href="#icon-settings"></use></svg><span>Paramétrage V1.1</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info-box">
+      <div class="user-avatar" id="userInitial">AD</div>
+      <div>
+        <div class="user-name">Administrateur PRODERMA</div>
+        <div class="user-role">Administrateur</div>
+      </div>
+    </div>
+    <button class="btn-icon" onclick="logout()" title="Déconnexion" style="color:#a8bedb">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="page-title-group">
+      <h1>Microbiologie</h1>
+      <div class="breadcrumbs">Analyses microbiologiques — IANOR / ISO</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="lab-clock">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span id="liveTime">--:--:--</span>
+      </div>
+      <div class="mode-badge">RÉFÉRENTIEL IANOR V1.1</div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleLang()">FR / AR</button>
+    </div>
+  </header>
+
+  <div class="content-body">
+
+    <div id="alertBox" style="display:none"></div>
+
+    <div class="grid">
+      <!-- ===== FORMULAIRE ===== -->
+      <div class="col-12 lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-title">
+            <svg width="16" height="16"><use href="#icon-microbe"></use></svg>
+            <span>Analyses Microbiologiques</span>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <form id="mForm">
+            <div class="form-grid">
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">N° Lot *</label>
+                <input class="form-input font-mono" name="lot" id="mLot" required>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Produit *</label>
+                <input class="form-input" name="product" id="mProduct" required>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Catégorie *</label>
+                <select class="form-select" name="category" id="mCategory" onchange="onMicroCategoryChange()" required>
+                  <option value="">— Sélectionner —</option>
+                  <option value="Produit cosmétique">Produit cosmétique</option>
+                  <option value="Eau">Eau</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Essai *</label>
+                <select class="form-select" name="test" id="mTest" onchange="microAssist()" required>
+                  <option value="">— Sélectionner d'abord une catégorie —</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 6">
+                <label class="form-label">Norme</label>
+                <input class="form-input font-mono" name="norm" id="mNorm" readonly>
+              </div>
+              <div class="form-field" style="grid-column:span 2">
+                <label class="form-label">Résultat</label>
+                <input class="form-input font-mono" name="value" id="mValue" type="number" step="any">
+              </div>
+              <div class="form-field" style="grid-column:span 2">
+                <label class="form-label">Unité</label>
+                <input class="form-input font-mono" name="unit" id="mUnit" value="UFC/g ou mL">
+              </div>
+              <div class="form-field" style="grid-column:span 2">
+                <label class="form-label">Qualitatif</label>
+                <select class="form-select" name="qual" id="mQual">
+                  <option value="">—</option>
+                  <option>Absence</option>
+                  <option>Présence</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Limite max</label>
+                <input class="form-input font-mono" name="max" id="mMax" type="number" step="any">
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Équipement</label>
+                <input class="form-input font-mono" name="equip" id="mEquip">
+              </div>
+              <div class="form-field" style="grid-column:span 6">
+                <label class="form-label">Analyste</label>
+                <select class="form-select" id="pcAnalyst" required>
+                  <option value="Ali Rabah Romaissa">Ali Rabah Romaissa</option>
+                  <option value="Saadi Nouria">Saadi Nouria</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Statut *</label>
+                <select class="form-select" id="pcStatusSelect" required>
+                  <option value="Conforme">Conforme</option>
+                  <option value="Non conforme">Non conforme</option>
+                </select>
+              </div>
+            </div>
+            <div class="norm-guide-box" style="margin:16px 0" id="mHelp">
+              <b>Assistance :</b> Sélectionnez une catégorie puis un essai.
+            </div>
+            <div>
+              <button type="submit" class="btn btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Enregistrer Résultat
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== HISTORIQUE ===== -->
+      <div class="col-12 lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-title">
+            Historique Microbiologique
+            <span id="microCount" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:8px">
+              (0 analyse(s))
+            </span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="lab-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>N° Lot</th>
+                <th>Produit</th>
+                <th>Catégorie</th>
+                <th>Essai</th>
+                <th>Norme</th>
+                <th>Résultat</th>
+                <th>Statut</th>
+                <th style="text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="microBody">
+              <tr><td colspan="9" class="empty-cell">Aucune analyse microbiologique enregistrée.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Données de démonstration ===== */
+let microAnalyses = [
+  {
+    id: 1,
+    date: "2024-01-20",
+    lot: "LOT-2024-001",
+    product: "Crème hydratante PRODERMA",
+    category: "Produit cosmétique",
+    test: "Germes aérobies 30°C /g",
+    norm: "NA 8287:2018 / ISO 21149:2017",
+    value: "120",
+    unit: "UFC/g ou mL",
+    qual: "",
+    max: "1000",
+    equip: "Étuve 30°C",
+    analyst: "admin"
+  },
+  {
+    id: 2,
+    date: "2024-01-21",
+    lot: "LOT-2024-002",
+    product: "Eau purifiée",
+    category: "Eau",
+    test: "Coliformes totaux 37°C",
+    norm: "NA 8284 / ISO 9308-1",
+    value: "",
+    unit: "UFC/100 mL",
+    qual: "Présence",
+    max: "",
+    equip: "Étuve 37°C",
+    analyst: "admin"
+  }
+];
+
+/* ===== Liste des essais qualitatifs (Absence / Présence) ===== */
+function getAbsenceTests() {
+  return [
+    'Escherichia coli /g',
+    'Pseudomonas aeruginosa /g',
+    'Staphylococcus aureus /g',
+    'Candida albicans /g',
+    'Escherichia coli',
+    'Escherichia. Coli',
+    'Entérocoques 37°C',
+    'Clostridium 45°C',
+    'Coliformes totaux 37°C',
+    'Coliformes fécaux 45°C'
+  ];
+}
+
+/* ===== Calcul statut ===== */
+function computeMicroStatus(test, value, qual, max) {
+  const isAbsence = getAbsenceTests().includes(test);
+  if (isAbsence) {
+    if (qual === "Absence") return "Conforme";
+    if (qual === "Présence") return "Non conforme";
+    return "À vérifier";
+  }
+  if (value !== '' && value !== null && !isNaN(parseFloat(value)) && !isNaN(parseFloat(max))) {
+    return (parseFloat(value) <= parseFloat(max)) ? "Conforme" : "Non conforme";
+  }
+  return "À vérifier";
+}
+
+/* ===== Horloge ===== */
+setInterval(() => {
+  const d = new Date();
+  const el = document.getElementById("liveTime");
+  if (el) el.textContent = d.toLocaleTimeString('fr-FR', { hour12: false });
+}, 1000);
+
+/* ===== Déconnexion ===== */
+function logout() {
+  if (confirm("Confirmez-vous la déconnexion ?")) {
+    window.location.href = "index.html";
+  }
+}
+
+/* ===== Bascule langue ===== */
+function toggleLang() {
+  document.documentElement.dir = document.documentElement.dir === "rtl" ? "ltr" : "rtl";
+}
+
+/* ===== Échappement HTML ===== */
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+/* ===== Affichage d'alerte ===== */
+function showAlert(msg, type) {
+  const box = document.getElementById("alertBox");
+  box.innerHTML = `<div class="alert alert-${type}">${esc(msg)}</div>`;
+  box.style.display = "block";
+  setTimeout(() => { box.style.display = "none"; }, 6000);
+}
+
+/* ==========================================================================
+   CASCADE CATÉGORIE → ESSAI pour la Microbiologie
+   ========================================================================== */
+const ESSAIS_MICRO_PAR_CATEGORIE = {
+  "Produit cosmétique": [
+    { label: "Germes aérobies 30°C /g",     norm: "NA ISO 21149:2017 /NA 8287:2018" },
+    { label: "Levures et moisissures /g",    norm: "NA ISO 16212 /NA 18984:2018" },
+    { label: "Escherichia coli /g",          norm: "NA ISO 2115 / NA 14808 :2016" },
+    { label: "Pseudomonas aeruginosa /g",    norm: "NA 18978 :2018" },
+    { label: "Staphylococcus aureus /g",     norm: "NA ISO 22718 / NA 14809 :2018" },
+    { label: "Candida albicans /g",          norm: "NA ISO 18416 :2015 / NA 18982 :2018" }
+  ],
+  "Eau": [
+    { label: "Entérocoques 37°C",            norm: "ISO 7899-2" },
+    { label: "Clostridium 45°C",             norm: "ISO 6461-2" },
+    { label: "Coliformes totaux 37°C",       norm: "ISO 9308-1" },
+    { label: "Coliformes fécaux 45°C",       norm: "ISO 9308-1" },
+    { label: "Escherichia coli",             norm: "ISO 9308-1" }
+  ]
+};
+
+/* Fonction : recharger les essais selon la catégorie */
+function onMicroCategoryChange() {
+  const cat = document.getElementById("mCategory").value;
+  const testSelect = document.getElementById("mTest");
+  const normField = document.getElementById("mNorm");
+  const helpBox = document.getElementById("mHelp");
+
+  testSelect.innerHTML = "";
+  normField.value = "";
+
+  if (!cat) {
+    testSelect.innerHTML = '<option value="">— Sélectionner d\'abord une catégorie —</option>';
+    helpBox.innerHTML = "<b>Assistance :</b> Sélectionnez une catégorie puis un essai.";
+    return;
+  }
+
+  const essais = ESSAIS_MICRO_PAR_CATEGORIE[cat] || [];
+
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = "— Sélectionner un essai —";
+  testSelect.appendChild(defaultOpt);
+
+  essais.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = e.label;
+    opt.textContent = e.label;
+    opt.dataset.norm = e.norm;
+    testSelect.appendChild(opt);
+  });
+
+  helpBox.innerHTML = `<b>Assistance :</b> Catégorie « ${esc(cat)} » — <strong>${essais.length} essai(s)</strong> disponible(s).`;
+}
+
+/* Fonction : afficher la norme selon l'essai choisi */
+function microAssist() {
+  const testSelect = document.getElementById("mTest");
+  const selected = testSelect.options[testSelect.selectedIndex];
+  const normField = document.getElementById("mNorm");
+  const helpBox = document.getElementById("mHelp");
+
+  let norm = "";
+  if (selected && selected.dataset && selected.dataset.norm) {
+    norm = selected.dataset.norm;
+  }
+  normField.value = norm;
+
+  const t = testSelect.value;
+  const cat = document.getElementById("mCategory").value;
+
+  if (!t) {
+    helpBox.innerHTML = "<b>Assistance :</b> Sélectionnez un essai.";
+    return;
+  }
+
+  helpBox.innerHTML = `<b>Assistance :</b> ${esc(t)} <span style="color:var(--text-muted)">(${esc(cat)})</span> — Norme : <code>${esc(norm || "—")}</code>`;
+}
+
+/* ===== Rendu du tableau ===== */
+function renderTable() {
+  const tbody = document.getElementById("microBody");
+  const countEl = document.getElementById("microCount");
+
+  if (microAnalyses.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">Aucune analyse microbiologique enregistrée.</td></tr>';
+    countEl.textContent = "(0 analyse(s))";
+    return;
+  }
+
+  countEl.textContent = `(${microAnalyses.length} analyse(s))`;
+
+  tbody.innerHTML = microAnalyses.map(a => {
+    const status = computeMicroStatus(a.test, a.value, a.qual, a.max);
+    const statusClass = status === 'Conforme' ? 'ok' : (status === 'Non conforme' ? 'ko' : 'wait');
+    const displayVal = a.qual || a.value || "—";
+
+    return `
+      <tr>
+        <td>${esc(a.date)}</td>
+        <td><code>${esc(a.lot)}</code></td>
+        <td><strong>${esc(a.product)}</strong></td>
+        <td><span class="status-pill info">${esc(a.category || '—')}</span></td>
+        <td>${esc(a.test)}</td>
+        <td><code style="font-size:11px">${esc(a.norm || '—')}</code></td>
+        <td><code><strong>${esc(displayVal)}</strong> ${esc(a.unit || '')}</code></td>
+        <td><span class="status-pill ${statusClass}">${esc(status)}</span></td>
+        <td style="text-align:right">
+          <button class="btn btn-danger btn-sm" title="Supprimer" onclick="deleteAnalysis(${a.id})">✕</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+/* ===== Suppression ===== */
+function deleteAnalysis(id) {
+  if (!confirm('Confirmer la suppression ?')) return;
+  microAnalyses = microAnalyses.filter(a => a.id !== id);
+  renderTable();
+  showAlert("✅ Analyse supprimée.", "success");
+}
+
+/* ===== Soumission du formulaire ===== */
+document.getElementById("mForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const lot = document.getElementById("mLot").value.trim();
+  const product = document.getElementById("mProduct").value.trim();
+  const category = document.getElementById("mCategory").value;
+  const test = document.getElementById("mTest").value;
+  const norm = document.getElementById("mNorm").value.trim();
+  const value = document.getElementById("mValue").value.trim();
+  const unit = document.getElementById("mUnit").value.trim();
+  const qual = document.getElementById("mQual").value;
+  const max = document.getElementById("mMax").value.trim();
+  const equip = document.getElementById("mEquip").value.trim();
+  const analyst = document.getElementById("mAnalyst").value.trim() || "admin";
+
+  if (!lot || !product) {
+    showAlert("N° Lot et Produit sont obligatoires.", "error");
+    return;
+  }
+  if (!category || !test) {
+    showAlert("Catégorie et Essai sont obligatoires.", "error");
+    return;
+  }
+
+  const status = computeMicroStatus(test, value, qual, max);
+
+  const newAnalysis = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('fr-FR'),
+    lot, product, category, test, norm,
+    value, unit, qual, max, equip, analyst
+  };
+
+  microAnalyses.unshift(newAnalysis);
+  renderTable();
+
+  if (status === "Non conforme") {
+    showAlert(`⚠ Analyse NON CONFORME : ${lot} — ${test} = ${qual || value}. OOS créé.`, "warn");
+  } else {
+    showAlert(`✅ Analyse enregistrée : ${lot} — ${test} (${status})`, "success");
+  }
+
+  // Reset partiel du formulaire
+  document.getElementById("mLot").value = "";
+  document.getElementById("mProduct").value = "";
+  document.getElementById("mValue").value = "";
+  document.getElementById("mQual").value = "";
+  document.getElementById("mMax").value = "";
+  document.getElementById("mEquip").value = "";
+  document.getElementById("mHelp").innerHTML = "<b>Assistance :</b> Sélectionnez une catégorie puis un essai.";
+});
+
+/* ===== Init ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  renderTable();
+  onMicroCategoryChange();
+});
+</script>
+</body>
+</html>
